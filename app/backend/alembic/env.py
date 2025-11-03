@@ -8,8 +8,10 @@ from sqlalchemy import engine_from_config, pool
 sys.path.insert(0, Path(__file__).absolute().parent.parent.parent.parent.__str__())
 
 # import all database tables HERE ------------------------------
-from app.backend.models.db.base import Base  # noqa
-from app.backend.models.db.users import UserAccount  # noqa
+from app.backend.db.base import Base  # noqa
+from app.backend.db.models import (
+    UserCompletedChallengeTable,  # noqa
+)
 # --------------------------------------------------------------
 
 # this is the Alembic Config object, which provides

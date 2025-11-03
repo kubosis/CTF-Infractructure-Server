@@ -10,8 +10,8 @@ from getpass import getpass
 import typer
 from sqlalchemy import select
 
-from app.backend.models.db.session import AsyncSessionLocal
-from app.backend.models.db.users import RoleEnum, UserAccount
+from app.backend.db.models import RoleEnum, UserTable
+from app.backend.db.session import AsyncSessionLocal
 from app.backend.security.password import PasswordManager
 
 app = typer.Typer()
@@ -24,7 +24,7 @@ async def _create_admin(username: str, email: str, password: str):
     password_manager = PasswordManager()
     hashed_password = password_manager.hash_password(password)
 
-    admin_user = UserAccount(
+    admin_user = UserTable(
         username=username,
         email=email,
         hashed_password=hashed_password,
@@ -33,7 +33,7 @@ async def _create_admin(username: str, email: str, password: str):
     )
 
     async with AsyncSessionLocal() as session:
-        stmt = select(UserAccount).where(UserAccount.email == email)
+        stmt = select(UserTable).where(UserTable.email == email)
         result = await session.execute(stmt)
         existing_user = result.scalar_one_or_none()
 

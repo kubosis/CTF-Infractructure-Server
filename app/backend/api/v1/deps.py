@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.backend.config.settings import get_settings
 from app.backend.models.db.session import AsyncSessionLocal
-from app.backend.models.db.users import RoleEnum, UserAccount
+from app.backend.models.models import RoleEnum, UserTable
 from app.backend.repository.base import BaseCRUDRepository
 from app.backend.repository.users import UserCRUDRepository
 
@@ -33,7 +33,7 @@ class TokenPayload(BaseModel):
     exp: int | None = None
 
 
-async def get_current_user(session: AsyncSessionDep, token: TokenDep) -> UserAccount:
+async def get_current_user(session: AsyncSessionDep, token: TokenDep) -> UserTable:
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
         token_data = TokenPayload(**payload)
@@ -54,7 +54,7 @@ async def get_current_user(session: AsyncSessionDep, token: TokenDep) -> UserAcc
             headers={"WWW-Authenticate": "Bearer"},
         ) from None
 
-    user = await session.get(UserAccount, int(token_data.sub))
+    user = await session.get(UserTable, int(token_data.sub))
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -65,7 +65,7 @@ async def get_current_user(session: AsyncSessionDep, token: TokenDep) -> UserAcc
 
 
 """ Dependency that injects user - checks if the user is logged in """
-CurrentUserDep = Annotated[UserAccount, Depends(get_current_user)]
+CurrentUserDep = Annotated[UserTable, Depends(get_current_user)]
 
 
 async def get_current_superuser(current_user: CurrentUserDep):
@@ -75,7 +75,7 @@ async def get_current_superuser(current_user: CurrentUserDep):
 
 
 """ Dependency that injects admin (checks if the user is logged in and has admin privileges """
-CurrentAdminDep = Annotated[UserAccount, Depends(get_current_superuser)]
+CurrentAdminDep = Annotated[UserTable, Depends(get_current_superuser)]
 
 
 def get_repository(repo_type: type[BaseCRUDRepository]) -> Callable:
@@ -97,7 +97,7 @@ def get_self_or_admin(
     # FastAPI will automatically pass the path parameter 'user_id'
     user_id: int,
     current_user: CurrentUserDep,
-) -> UserAccount:
+) -> UserTable:
     """
     A dependency that checks if the current user is:
     1. The user they are trying to modify (is_self)
@@ -116,4 +116,4 @@ def get_self_or_admin(
     return current_user
 
 
-CurrentUserOrAdminDep = Annotated[UserAccount, Depends(get_self_or_admin)]
+CurrentUserOrAdminDep = Annotated[UserTable, Depends(get_self_or_admin)]

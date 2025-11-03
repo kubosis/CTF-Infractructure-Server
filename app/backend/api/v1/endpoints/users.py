@@ -17,16 +17,16 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app.backend.api.v1.deps import CurrentAdminDep, CurrentUserDep, CurrentUserOrAdminDep, UserRepositoryDep
-from app.backend.models.db.users import UserAccount
-from app.backend.models.schema.tokens import TokenResponse
-from app.backend.models.schema.users import *
+from app.backend.db.models import UserTable
+from app.backend.schema.tokens import TokenResponse
+from app.backend.schema.users import *
 from app.backend.security.tokens import create_jwt_access_token
 from app.backend.utils.exceptions import DBEntityDoesNotExist
 
 router = fastapi.APIRouter(tags=["users"])
 
 
-def _construct_user_in_response(user: UserAccount, include_password_hash: bool = False) -> UserInResponse:
+def _construct_user_in_response(user: UserTable, include_password_hash: bool = False) -> UserInResponse:
     user_in_response = UserInResponse(
         id=user.id,
         username=user.username,
