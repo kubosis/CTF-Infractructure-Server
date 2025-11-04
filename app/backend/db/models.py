@@ -98,6 +98,7 @@ class TeamTable(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     name: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
+    password: Mapped[str] = mapped_column(String(128), nullable=False, unique=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
 
     user_associations: Mapped[list["UserInTeamTable"]] = relationship(

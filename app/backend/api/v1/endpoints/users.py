@@ -18,7 +18,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from loguru import logger
 
 from app.backend.api.v1.deps import CurrentAdminDep, CurrentUserDep, CurrentUserOrAdminDep, UserRepositoryDep
-from app.backend.db.models import UserTable
+from app.backend.db.models import RoleEnum, UserTable
 from app.backend.schema.tokens import TokenResponse
 from app.backend.schema.users import *
 from app.backend.security.tokens import create_jwt_access_token
@@ -71,7 +71,7 @@ async def get_users(
 
 @router.post("/login", response_model=TokenResponse, status_code=status.HTTP_200_OK)
 async def login_for_access_token(
-    login_data: Annotated[OAuth2PasswordRequestForm, Depends()], account_repo: UserRepositoryDep
+    login_data: Annotated[OAuth2PasswordRequestForm, Depends()], account_repo: UserRepositoryDep, admin: bool = False
 ):
     """
     Handles user login and returns a JWT.
@@ -86,6 +86,14 @@ async def login_for_access_token(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    if admin and db_user.role != RoleEnum.ADMIN:
+        logger.warning(f"User {db_user.username} tried to login to admin panel")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not sufficient rights",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
