@@ -4,7 +4,7 @@
 target-version = "py310"
 
 # Enabled rules
-select = [
+lint.select = [
     "E",   # pycodestyle errors
     "F",   # pyflakes
     "I",   # import sorting
@@ -15,8 +15,12 @@ select = [
     "RUF"  # Ruff-specific rules
 ]
 
-ignore = [
+lint.ignore = [
     "E501", # line too long
+    "F405", # star imports
+    "B008", # call in argument defaults
+    "F403", # star imports
+    "RUF002", # dashes in docstring
 ]
 
 # Auto-fix behavior
