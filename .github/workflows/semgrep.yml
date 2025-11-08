@@ -4,11 +4,11 @@ on:
   push:
     branches:
       - main          # Run on push to main branch
-      - devel         # Run on push to devel branch
+      - devel         # and devel branch
   pull_request:
     branches:
-      - main          # Run on pull request targeting main
-      - devel         # Run on pull request targeting devel
+      - main          # Run on PR targeting main
+      - devel         # or devel
 
 jobs:
   semgrep_scan:
@@ -16,25 +16,21 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3  # Checkout the repo code
+        uses: actions/checkout@v3  # Checkout repository code
 
       - name: Run Semgrep scan
         uses: returntocorp/semgrep-action@v1
         with:
-          config: "p/ci"           # Use Semgrep's built-in ruleset for CI
-
-      - name: Generate SARIF report
-        # This step explicitly exports SARIF if Semgrep action doesn't do it automatically
-        run: semgrep --config p/ci --sarif > semgrep-report.sarif
+          config: "p/ci"           # Use Semgrep's built-in 'p/ci' ruleset (CI/CD)
 
       - name: Upload Semgrep results as artifact
-        if: failure()              # Upload artifact only if Semgrep failed
-        uses: actions/upload-artifact@v4
+        if: failure()              # Upload artifact only if Semgrep scan fails
+        uses: actions/upload-artifact@v4  # <-- frissítve v4-re
         with:
-          name: semgrep-report     # Artifact name
-          path: semgrep-report.sarif  # SARIF file path
+          name: semgrep-report     # Artifact name in workflow UI
+          path: semgrep-report.sarif  # Path to the report file
 
       - name: Upload SARIF to GitHub code scanning
-        uses: github/codeql-action/upload-sarif@v3  # Updated to v3
+        uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: semgrep-report.sarif  # Upload SARIF to GitHub
+          sarif_file: semgrep-report.sarif  # Always upload SARIF report for GitHub UI
