@@ -72,7 +72,7 @@ The file must define the following keys:
 ```yaml
 name: <challenge_name>
 difficulty: <easy|medium|hard>
-category : <Web|crypto|re|forensic|other>
+category: <Web|crypto|re|forensic|other>
 points: <integer>
 author: <your_name>
 description: <your_description_here>
@@ -83,6 +83,7 @@ description: <your_description_here>
 - The flag is injected at runtime via the environment variable CTF_FLAG.
 - The web application provides this variable when starting the container.
 - Your challenge code should read the flag from this environment variable.
+
 
 
 
