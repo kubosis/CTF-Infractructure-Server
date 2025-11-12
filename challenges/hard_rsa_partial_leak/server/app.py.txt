@@ -1,0 +1,19 @@
+from flask import Flask, jsonify
+import json
+
+app = Flask(__name__)
+
+# Load data
+pub = json.load(open("pub.json"))
+cipher = json.load(open("cipher.json"))
+
+@app.get("/pub")
+def get_pub():
+    return jsonify(pub)
+
+@app.get("/cipher")
+def get_cipher():
+    return jsonify(cipher)
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
