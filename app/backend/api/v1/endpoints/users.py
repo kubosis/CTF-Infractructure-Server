@@ -51,6 +51,7 @@ async def create_user(
         logger.info(f"New user registered: username={db_user.username}, email={db_user.email}")
     else:
         logger.error(f"User registration failed for email={user.email}")
+        raise HTTPException(status.HTTP_409_CONFLICT, "User with this email already exists.")
     return _construct_user_in_response(db_user)
 
 
