@@ -105,7 +105,7 @@ class TeamTable(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     name: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
-    password: Mapped[str] = mapped_column(String(128), nullable=False, unique=True)
+    join_code: Mapped[str] = mapped_column(String(8), nullable=False, unique=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
 
     user_associations: Mapped[list["UserInTeamTable"]] = relationship(
@@ -118,7 +118,7 @@ class TeamTable(Base):
 
 
 class UserInTeamTable(Base):
-    __tablename__ = "user_teams"  # --- FIX: Naming convention ---
+    __tablename__ = "user_teams"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
 

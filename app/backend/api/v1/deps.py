@@ -11,6 +11,7 @@ from app.backend.config.settings import get_settings
 from app.backend.db.models import RoleEnum, UserTable
 from app.backend.db.session import AsyncSessionLocal
 from app.backend.repository.base import BaseCRUDRepository
+from app.backend.repository.teams import TeamsCRUDRepository
 from app.backend.repository.users import UserCRUDRepository
 
 settings = get_settings()
@@ -91,6 +92,7 @@ def get_repository(repo_type: type[BaseCRUDRepository]) -> Callable:
 
 
 UserRepositoryDep = Annotated[BaseCRUDRepository, Depends(get_repository(repo_type=UserCRUDRepository))]
+TeamsRepositoryDep = Annotated[BaseCRUDRepository, Depends(get_repository(repo_type=TeamsCRUDRepository))]
 
 
 def get_self_or_admin(
