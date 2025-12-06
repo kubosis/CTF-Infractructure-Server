@@ -74,8 +74,18 @@ class ChallengeTable(Base):
 
     points: Mapped[int] = mapped_column(Integer, nullable=False)
 
+    # optional stored flag (if provided, used for validation)
+    flag: Mapped[str | None] = mapped_column(String(512), nullable=True, default=None)
+
+    # per-challenge CTF state
+    ctf_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    ctf_ends_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
+    ctf_started_by_user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+    ctf_started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
+
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
-    valid_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
 
     completion_associations: Mapped[list["UserCompletedChallengeTable"]] = relationship(
         back_populates="challenge", cascade="all, delete-orphan"

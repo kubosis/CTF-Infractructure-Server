@@ -32,9 +32,12 @@ class BackendBaseSettings(pydantic_settings.BaseSettings):
     ALLOWED_ORIGINS: list[str] = [
         "http://localhost:3000",
         "http://0.0.0.0:3000",
+        "http://127.0.0.1:3000",
     ]
+
     ALLOWED_METHODS: list[str] = ["*"]
     ALLOWED_HEADERS: list[str] = ["*"]
+    IS_ALLOWED_CREDENTIALS: bool = True
 
     LOGGING_LEVEL: int = logging.INFO
     LOGGERS: tuple[str, str] = ("uvicorn.asgi", "uvicorn.access")
