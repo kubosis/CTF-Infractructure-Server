@@ -1,5 +1,7 @@
 from datetime import datetime
+
 from pydantic import constr
+
 from app.backend.schema.base import BaseSchemaModel
 
 

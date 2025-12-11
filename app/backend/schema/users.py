@@ -1,10 +1,9 @@
 from datetime import datetime
-from pydantic import EmailStr, constr, BaseModel
 
-from app.backend.schema.base import BaseSchemaModel
+from pydantic import BaseModel, EmailStr, constr
+
 from app.backend.db.models import RoleEnum
-
-
+from app.backend.schema.base import BaseSchemaModel
 
 
 # ------------------------------

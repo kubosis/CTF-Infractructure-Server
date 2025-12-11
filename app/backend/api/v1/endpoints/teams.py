@@ -23,14 +23,13 @@
 ##
 
 import fastapi
-from fastapi import HTTPException, status, Body
+from fastapi import Body, HTTPException, status
 from loguru import logger
 
 from app.backend.api.v1.deps import CurrentUserDep, TeamsRepositoryDep, UserRepositoryDep
-from app.backend.schema.teams import FullTeamInResponse, TeamInCreate, TeamJoinViaInvite
-
-from app.backend.security.tokens import create_team_invite_token, decode_team_invite_token
 from app.backend.config.settings import get_settings
+from app.backend.schema.teams import FullTeamInResponse, TeamInCreate, TeamJoinViaInvite
+from app.backend.security.tokens import create_team_invite_token, decode_team_invite_token
 
 router = fastapi.APIRouter(tags=["teams"])
 settings = get_settings()
@@ -211,8 +210,8 @@ async def join_team_invite(
     # 1. Decode and validate token
     try:
         data = decode_team_invite_token(payload.token)
-    except Exception:
-        raise HTTPException(400, "Invalid or expired invite link")
+    except Exception as err:
+        raise HTTPException(400, "Invalid or expired invite link") from err
 
     team_id = data["team_id"]
 
@@ -254,8 +253,8 @@ async def preview_invite_link(token: str, team_repo: TeamsRepositoryDep):
 
     try:
         data = decode_team_invite_token(token)
-    except Exception:
-        raise HTTPException(400, "Invalid or expired invite link")
+    except Exception as err:
+        raise HTTPException(400, "Invalid or expired invite link") from err
 
     team_id = data["team_id"]
     team = await team_repo.read_team_by_id(team_id)

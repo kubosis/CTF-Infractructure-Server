@@ -2,7 +2,7 @@ from collections.abc import AsyncGenerator, Callable
 from typing import Annotated
 
 import jwt
-from fastapi import Depends, HTTPException, status, Request
+from fastapi import Depends, HTTPException, Request, status
 from pydantic import BaseModel, ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -64,10 +64,18 @@ async def get_current_user(
         )
         token_data = TokenPayload(**payload)
 
-    except jwt.ExpiredSignatureError:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Token expired.")
-    except (jwt.PyJWTError, ValidationError):
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid authentication token.")
+    except jwt.ExpiredSignatureError as err:
+        raise HTTPException(
+            status.HTTP_401_UNAUTHORIZED,
+            "Token expired."
+        ) from err
+
+    except (jwt.PyJWTError, ValidationError) as err:
+        raise HTTPException(
+            status.HTTP_401_UNAUTHORIZED,
+            "Invalid authentication token."
+        ) from err
+
 
     user = await session.get(UserTable, int(token_data.sub))
 

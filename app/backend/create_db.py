@@ -1,11 +1,11 @@
 import asyncio
+
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from app.backend.config.settings import get_settings
 
 # Import Base and ALL models so SQLAlchemy knows them
 from app.backend.db.base import Base
-from app.backend.db import models  # important: importing registers all tables
 
 
 async def init_db():

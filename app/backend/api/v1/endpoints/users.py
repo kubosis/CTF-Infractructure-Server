@@ -10,15 +10,13 @@ Prefix: /api/v1/users
 - *DELETE /api/v1/users/:id* – delete a user (admin only)
 """
 
+from datetime import datetime, timedelta, timezone
 from typing import Annotated
-from datetime import timedelta, datetime, timezone
-from app.backend.limiter import limiter
-
 
 import fastapi
-from fastapi import Depends, HTTPException, status, Request
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.responses import JSONResponse
+from fastapi.security import OAuth2PasswordRequestForm
 from loguru import logger
 
 from app.backend.api.v1.deps import (
@@ -27,13 +25,12 @@ from app.backend.api.v1.deps import (
     TeamsRepositoryDep,
     UserRepositoryDep,
 )
+from app.backend.config.settings import get_settings
 from app.backend.db.models import RoleEnum, UserTable
-from app.backend.schema.users import UserInCreate, UserInUpdate, UserInResponse
+from app.backend.limiter import limiter
+from app.backend.schema.users import AdminPasswordChange, UserInCreate, UserInResponse, UserInUpdate
 from app.backend.security.tokens import create_jwt_access_token
 from app.backend.utils.exceptions import DBEntityDoesNotExist
-import app.backend.schema.users as schema_users
-from app.backend.schema.users import AdminPasswordChange
-from app.backend.config.settings import get_settings
 
 router = fastapi.APIRouter(tags=["users"])
 settings = get_settings()

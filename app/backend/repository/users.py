@@ -1,9 +1,9 @@
 import typing
 
 import sqlalchemy
+from fastapi import HTTPException, status
 from loguru import logger
 from sqlalchemy.exc import IntegrityError
-from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import functions as sqlalchemy_functions
 

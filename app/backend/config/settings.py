@@ -1,11 +1,10 @@
 import logging
-from pathlib import Path
 from functools import lru_cache
+from pathlib import Path
 
 import decouple
-from pydantic_settings import BaseSettings
 from pydantic import field_validator
-
+from pydantic_settings import BaseSettings
 
 backend_settings = None
 
@@ -139,7 +138,7 @@ class BackendBaseSettings(BaseSettings):
         }
 
 
-@lru_cache()
+@lru_cache
 def get_settings() -> BackendBaseSettings:
     global backend_settings
     if backend_settings is None:

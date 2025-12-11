@@ -1,8 +1,8 @@
-import fastapi
 import os
+
+import fastapi
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import Depends, APIRouter
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware

@@ -146,8 +146,7 @@ class TeamTable(Base):
         "user_associations", "user"
     )
 
-    __mapper_args__ = {"eager_defaults": True}
-
+    __mapper_args__: ClassVar[dict] = {"eager_defaults": True}
 
 
 
