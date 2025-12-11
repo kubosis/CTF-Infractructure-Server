@@ -20,11 +20,12 @@ class UserTable(Base):
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     username: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
     email: Mapped[str] = mapped_column(String(128), nullable=False, unique=True)
-    role: Mapped[Enum] = mapped_column(
+    role: Mapped[RoleEnum] = mapped_column(
         Enum(RoleEnum, name="role_enum", native_enum=False),
         nullable=False,
         default=RoleEnum.USER,
     )
+
 
     hashed_password: Mapped[str] = mapped_column(String(1024), nullable=False)
     is_email_verified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
@@ -74,8 +75,18 @@ class ChallengeTable(Base):
 
     points: Mapped[int] = mapped_column(Integer, nullable=False)
 
+    # optional stored flag (if provided, used for validation)
+    flag: Mapped[str | None] = mapped_column(String(512), nullable=True, default=None)
+
+    # per-challenge CTF state
+    ctf_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    ctf_ends_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
+    ctf_started_by_user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+    ctf_started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
+
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
-    valid_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
 
     completion_associations: Mapped[list["UserCompletedChallengeTable"]] = relationship(
         back_populates="challenge", cascade="all, delete-orphan"
@@ -105,20 +116,42 @@ class TeamTable(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     name: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
-    password: Mapped[str] = mapped_column(String(128), nullable=False, unique=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
 
-    user_associations: Mapped[list["UserInTeamTable"]] = relationship(
-        back_populates="team", cascade="all, delete-orphan"
+    # captain of the team
+    captain_user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
     )
 
-    users: AssociationProxy[list["UserTable"]] = association_proxy("user_associations", "user")
+    # hashed team password
+    team_password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
+
+    join_code: Mapped[str] = mapped_column(String(8), nullable=False, unique=True)
+
+    # invite token stored raw (secure random string)
+    invite_token: Mapped[str] = mapped_column(String(128), nullable=False, unique=True)
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+
+    user_associations: Mapped[list["UserInTeamTable"]] = relationship(
+        back_populates="team",
+        cascade="all, delete-orphan",
+    )
+
+    users: AssociationProxy[list["UserTable"]] = association_proxy(
+        "user_associations", "user"
+    )
 
     __mapper_args__: ClassVar[dict] = {"eager_defaults": True}
 
 
+
 class UserInTeamTable(Base):
-    __tablename__ = "user_teams"  # --- FIX: Naming convention ---
+    __tablename__ = "user_teams"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
 

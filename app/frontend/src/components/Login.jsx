@@ -1,16 +1,21 @@
+// src/components/Login.jsx
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { hashPassword } from "../utils/passwordUtils";
 import { DEMO_MODE } from "../config/demo";
+import { api } from "../config/api";
 
 function Feedback({ message, type }) {
   if (!message) return null;
-  const className = type === "error" ? "error-text fade-in" : "success-text fade-in";
-  return <p className={className}>{message}</p>;
+  return (
+    <p className={`${type === "error" ? "error-text" : "success-text"} fade-in`}>
+      {message}
+    </p>
+  );
 }
 
 export default function Login({ setLoggedInUser }) {
   const navigate = useNavigate();
+
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -23,6 +28,7 @@ export default function Login({ setLoggedInUser }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     const email = formData.email.trim();
     const password = formData.password.trim();
 
@@ -31,28 +37,25 @@ export default function Login({ setLoggedInUser }) {
       return;
     }
 
-    const hashedPassword = await hashPassword(password);
     setLoading(true);
     setErrorMessage("");
     setSuccessMessage("");
 
-    // ===== DEMO MODE =====
+    // ======================
+    // DEMO MODE
+    // ======================
     if (DEMO_MODE) {
       setTimeout(() => {
         if (email === "user@example.com" && password === "123456") {
           const demoUser = {
-            username: "user1",
+            username: "demo_user",
             email,
             role: "user",
           };
-          localStorage.setItem("loggedInUser", JSON.stringify(demoUser));
           setLoggedInUser(demoUser);
           setSuccessMessage("Logged in successfully.");
           setLoading(false);
           setTimeout(() => navigate("/"), 800);
-        } else if (email === "admin@example.com") {
-          setErrorMessage("Access denied: Admins must log in via admin panel.");
-          setLoading(false);
         } else {
           setErrorMessage("Invalid email or password.");
           setLoading(false);
@@ -61,38 +64,64 @@ export default function Login({ setLoggedInUser }) {
       return;
     }
 
-    // ===== PRODUCTION MODE =====
+    // ======================
+    // REAL BACKEND LOGIN (HttpOnly cookie)
+    // ======================
     try {
-      const res = await fetch("/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include", // ensures session cookie is sent
-        body: JSON.stringify({ email, password: hashedPassword }),
+      const body = new URLSearchParams();
+      body.append("username", email);
+      body.append("password", password);
+
+      // Backend sets HttpOnly cookie here
+      const loginRes = await api.post("/users/login", body, {
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
       });
 
-      const data = await res.json();
-
-      if (!res.ok || !data.success) {
-        setErrorMessage(data.message || "Invalid email or password.");
+      if (loginRes.status !== 200) {
+        setErrorMessage("Invalid email or password.");
         setLoading(false);
         return;
       }
 
-      // Example backend response: { success: true, user: { username, role } }
-      setLoggedInUser(data.user);
-      setSuccessMessage("Logged in successfully!");
-      setLoading(false);
+      setSuccessMessage("Login successful");
 
-      // MFA check if backend indicates it’s required
-      if (data.requiresMFA) {
-        navigate("/mfa-verify");
-      } else {
-        navigate("/");
+      // ======================
+      // FETCH CURRENT USER
+      // ======================
+      const profileRes = await api.get("/users/me");
+      const user = profileRes.data;
+
+      // Block admins from user login
+      if (user.role === "admin") {
+        // clean up session
+        await api.post("/users/logout");
+
+        setErrorMessage("Admins must use the admin panel to log in.");
+        setSuccessMessage("");
+        setLoading(false);
+        return;
       }
 
+      // Normal user
+      setLoggedInUser(user);
+      setLoading(false);
+
+      // small delay to show success message
+      setTimeout(() => {
+        navigate("/");
+      }, 800);
+
     } catch (err) {
-      console.error("Login failed:", err);
-      setErrorMessage("Server error. Please try again later.");
+      console.error("Login error:", err);
+
+      let msg = "Unable to login. Please try again.";
+
+      if (err.response?.status === 401) msg = "Incorrect email or password.";
+      if (err.response?.status === 429) msg = "Too many attempts. Slow down.";
+      if (err.response?.status === 422)
+        msg = err.response?.data?.detail?.[0]?.msg || "Invalid input.";
+
+      setErrorMessage(msg);
       setLoading(false);
     }
   };
@@ -101,6 +130,7 @@ export default function Login({ setLoggedInUser }) {
     <div className="register-container">
       <div className="register-card">
         <h2>Login</h2>
+
         <form onSubmit={handleSubmit}>
           <input
             type="email"
@@ -110,6 +140,7 @@ export default function Login({ setLoggedInUser }) {
             onChange={handleChange}
             required
           />
+
           <input
             type="password"
             name="password"
@@ -118,7 +149,8 @@ export default function Login({ setLoggedInUser }) {
             onChange={handleChange}
             required
           />
-          <button type="submit" className="enabled-animation" disabled={loading}>
+
+          <button type="submit" disabled={loading} className="enabled-animation">
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
@@ -132,13 +164,13 @@ export default function Login({ setLoggedInUser }) {
             Register
           </Link>
         </p>
+        <p className="mt-2 text-gray-400 text-sm">
+          Forgot your password?{" "}
+          <Link to="/forgotpassword" className="text-blue-400 underline">
+            Reset it
+          </Link>
+        </p>
       </div>
     </div>
   );
 }
-
-// ===== TODO for backend integration =====
-// 1. Add MFA verification page (/mfa-verify) after successful login if backend returns requiresMFA=true.
-// 2. Backend must set secure session cookies (HttpOnly, Secure, SameSite=Lax).
-// 3. Backend must issue short-lived sessions and require re-auth on expiry.
-// 4. Never store credentials, tokens, or roles in localStorage when DEMO_MODE=false.

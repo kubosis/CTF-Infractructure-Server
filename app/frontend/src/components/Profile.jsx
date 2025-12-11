@@ -2,108 +2,107 @@
 import React, { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer } from "recharts";
+import { api } from "../config/api";
 
 export default function Profile() {
   const { username } = useParams();
-  const [user, setUser] = useState(null); // Current user object
-  const [challengeData, setChallengeData] = useState([]); // Challenge statistics for pie chart
+  const [user, setUser] = useState(null);
+  const [challengeData, setChallengeData] = useState([]);
+  const [notFound, setNotFound] = useState(false);
+
+  const PIE_COLORS = [
+    "#22c55e",
+    "#3b82f6",
+    "#eab308",
+    "#ef4444",
+    "#a855f7",
+  ];
 
   useEffect(() => {
-    // --- Backend Note ---
-    // Replace mockUsers with a real API call:
-    // fetch(`/api/users/${username}`)
-    //   .then(res => res.json())
-    //   .then(data => {
-    //      setUser(data.user);
-    //      setChallengeData(data.challenges);
-    //   });
+    const loadProfile = async () => {
+      try {
+        // 1) Fetch user basic info by USERNAME
+        const userRes = await api.get(`/users/profile/${username}`);
+        setUser(userRes.data);
+        setNotFound(false);
 
-    const mockUsers = [
-      { username: "Alice", score: 120, team: "CryptoMasters" },
-      { username: "Bob", score: 80, team: "CryptoMasters" },
-      { username: "Charlie", score: 95, team: "WebWizards" },
-      { username: "Dave", score: 60, team: null }, // Example: user without a team
-    ];
+        // 2) Fetch solved challenges by category (API may not exist yet)
+        try {
+          const challRes = await api.get(`/challenges/user/${username}/solved`);
+          const solved = challRes.data || [];
 
-    // Find the user matching the username in URL
-    const foundUser = mockUsers.find(
-      (u) => u.username.toLowerCase() === username.toLowerCase()
-    );
+          const formattedData = solved.map((item, index) => ({
+            name: item.category,
+            value: item.count,
+            color: PIE_COLORS[index % PIE_COLORS.length],
+          }));
 
-    if (foundUser) {
-      setUser(foundUser);
+          setChallengeData(formattedData);
+        } catch (err) {
+          console.warn("Challenge stats not available yet.");
+          setChallengeData([]);
+        }
+      } catch (err) {
+        console.error("Profile load error:", err);
+        setNotFound(true);
+        setUser(null);
+      }
+    };
 
-      // Mock challenge data for demonstration
-      setChallengeData(foundUser.username === "Dave" ? [] : [
-        { name: "Crypto", value: 4, color: "#22c55e" },
-        { name: "Web", value: 3, color: "#facc15" },
-        { name: "Pwn", value: 2, color: "#ef4444" },
-        { name: "Forensics", value: 1, color: "#3b82f6" },
-      ]);
-    } else {
-      // User not found: clear state
-      setUser(null);
-      setChallengeData([]);
-    }
+    loadProfile();
   }, [username]);
 
-  if (!user) {
-    // Render "User not found" page
+  // Display if user doesn't exist
+  if (notFound) {
     return (
       <div className="register-container">
         <div className="register-card profile-card">
           <h2 className="profile-username">User not found</h2>
-          <div className="profile-footer">
-            <Link to="/" className="fancy-btn">Back to Home</Link>
-          </div>
+          <Link to="/" className="fancy-btn">Back to Home</Link>
         </div>
       </div>
     );
   }
 
-  // Calculate total challenges completed
-  const totalChallengesCompleted = challengeData.reduce(
-    (sum, c) => sum + c.value,
-    0
-  );
+  if (!user) return <p>Loading...</p>;
+
+  const totalSolved = challengeData.reduce((sum, c) => sum + c.value, 0);
 
   return (
     <div className="register-container">
       <div className="register-card profile-card">
         <h2 className="profile-username">{user.username}</h2>
 
+        {/* USER DETAILS */}
         <div className="profile-stats">
-          <p><strong>Score:</strong> {user.score}</p>
+          <p><strong>Score:</strong> {user.score ?? 0}</p>
 
-          {/* Display challenges completed; show message if none */}
-          <p>
-            <strong>Challenges Completed:</strong>{" "}
-            {totalChallengesCompleted > 0 ? totalChallengesCompleted : "No challenges completed yet"}
-          </p>
-
-          {/* Team display: clickable link only if user has a team */}
           <p>
             <strong>Team:</strong>{" "}
-            {user.team ? (
+            {user.team_name ? (
               <Link
-                to={`/team/${user.team}`}
+                to={`/team/${user.team_name}`}
                 className="team-link"
-                style={{ color: "#facc15", transition: "color 0.3s" }}
-                onMouseEnter={(e) => (e.target.style.color = "#22c55e")}
-                onMouseLeave={(e) => (e.target.style.color = "#facc15")}
+                style={{ color: "#facc15" }}
               >
-                {user.team}
+                {user.team_name}
               </Link>
             ) : (
               <span style={{ color: "#bbb" }}>No team</span>
             )}
           </p>
+
+
+          <p>
+            <strong>Total Challenges Solved:</strong>{" "}
+            {totalSolved > 0 ? totalSolved : "No challenges completed yet"}
+          </p>
         </div>
 
-        {/* Render pie chart only if user completed challenges */}
-        {totalChallengesCompleted > 0 && (
+        {/* PIE CHART */}
+        {totalSolved > 0 && (
           <div className="profile-chart">
-            <ResponsiveContainer width="100%" height={250}>
+            <ResponsiveContainer width="100%" height={260}>
               <PieChart>
                 <Pie
                   data={challengeData}
@@ -111,24 +110,15 @@ export default function Profile() {
                   nameKey="name"
                   cx="50%"
                   cy="50%"
-                  outerRadius={80}
+                  outerRadius={90}
                   label
                 >
                   {challengeData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
+                    <Cell key={index} fill={entry.color} />
                   ))}
                 </Pie>
                 <Tooltip />
-                <Legend
-                  verticalAlign="bottom"
-                  height={36}
-                  payload={challengeData.map((item) => ({
-                    value: item.name,
-                    type: "square",
-                    id: item.name,
-                    color: item.color,
-                  }))}
-                />
+                <Legend />
               </PieChart>
             </ResponsiveContainer>
           </div>
