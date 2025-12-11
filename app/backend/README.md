@@ -25,7 +25,7 @@ Provides authentication, users, teams, challenges, and scoring APIs.
 app/backend/
 ├── api/
 │ └── v1/
-│ ├── routes/
+│ ├── endpoints/
 │ └── router.py
 ├── config/
 │ └── settings.py
@@ -216,4 +216,5 @@ Enable HTTPS
 Use a strong SECRET_KEY
 
 Set proper COOKIE_DOMAIN
+
 
