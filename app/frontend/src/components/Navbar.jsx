@@ -3,30 +3,29 @@ import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/logo.jpg";
 import "../index.css";
 import { DEMO_MODE } from "../config/demo"; 
+import { API_BASE_URL } from "../config/api.jsx";
 
-export default function Navbar({ ctfActive, loggedInUser, setLoggedInUser }) {
+export default function Navbar({ ctfActive, loggedInUser, setLoggedInUser}) {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
+  try {
     if (DEMO_MODE) {
-      // Demo mode only - remove from localStorage
       localStorage.removeItem("loggedInUser");
     } else {
-      // Production mode - call backend logout endpoint
-      try {
-        await fetch("/api/auth/logout", {
-          method: "POST",
-          credentials: "include",
-        });
-      } catch (err) {
-        console.warn("Logout request failed (possibly offline):", err);
-      }
+      await fetch(`${API_BASE_URL}/api/v1/users/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
     }
+  } catch (err) {
+    console.warn("Logout request failed:", err);
+  }
 
-    // Always clear frontend state
-    setLoggedInUser(null);
-    navigate("/");
-  };
+  setLoggedInUser(null);
+  navigate("/");
+};
+
 
   return (
     <nav className="fixed top-0 left-0 w-full z-50 bg-gray-900 bg-opacity-80 backdrop-blur-sm flex justify-between items-center h-16 px-6">
