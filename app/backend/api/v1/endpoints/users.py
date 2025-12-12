@@ -27,10 +27,10 @@ from app.backend.api.v1.deps import (
 )
 from app.backend.config.settings import get_settings
 from app.backend.db.models import RoleEnum, UserTable
-from app.backend.limiter import limiter
 from app.backend.schema.users import AdminPasswordChange, UserInCreate, UserInResponse, UserInUpdate
 from app.backend.security.tokens import create_jwt_access_token
 from app.backend.utils.exceptions import DBEntityDoesNotExist
+from app.backend.utils.limiter import limiter
 
 router = fastapi.APIRouter(tags=["users"])
 settings = get_settings()

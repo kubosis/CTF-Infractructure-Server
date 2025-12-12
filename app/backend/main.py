@@ -10,7 +10,7 @@ from slowapi.util import get_remote_address
 
 from app.backend.api.v1.router import api_router
 from app.backend.config.settings import BackendBaseSettings, get_settings
-from app.backend.logging_config import setup_logging
+from app.backend.utils.logging_config import setup_logging
 
 
 def _create_fastapi_backend(app_settings: BackendBaseSettings) -> fastapi.FastAPI:
