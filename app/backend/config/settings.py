@@ -54,6 +54,20 @@ class BackendBaseSettings(BaseSettings):
     IS_ALLOWED_CREDENTIALS: bool = True  # must stay true for cookies
 
     # -----------------------------
+    # EMAIL / SMTP
+    # -----------------------------
+    SMTP_HOST: str = decouple.config("SMTP_HOST")
+    SMTP_PORT: int = decouple.config("SMTP_PORT", cast=int, default=587)
+    SMTP_USE_TLS: bool = decouple.config("SMTP_USE_TLS", cast=bool, default=True)
+
+    SMTP_USERNAME: str = decouple.config("SMTP_USERNAME")
+    SMTP_PASSWORD: str = decouple.config("SMTP_PASSWORD")
+
+    MAIL_FROM: str = decouple.config("MAIL_FROM")
+    CONTACT_RECEIVER_EMAIL: str = decouple.config("CONTACT_RECEIVER_EMAIL")
+
+
+    # -----------------------------
     # LOGGING
     # -----------------------------
     LOGGING_LEVEL: int = logging.INFO

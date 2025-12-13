@@ -47,6 +47,24 @@ class UserTable(Base):
 
     __mapper_args__: ClassVar[dict] = {"eager_defaults": True}
 
+class ContactMessageTable(Base):
+    __tablename__ = "contact_messages"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
+    email: Mapped[str] = mapped_column(String(128), nullable=False)
+    message: Mapped[str] = mapped_column(String(2000), nullable=False)
+    content_hash: Mapped[str] = mapped_column(String(64), index=True)
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+
+
+    __mapper_args__: ClassVar[dict] = {"eager_defaults": True}
+
 
 class DifficultyEnum(enum.Enum):
     EASY = "easy"
