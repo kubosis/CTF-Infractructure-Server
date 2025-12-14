@@ -1,4 +1,4 @@
-name: Trivy Security Scan
+name: Trivy Security Scan + Docker Image Scan
 
 on:
   push:
@@ -45,7 +45,7 @@ jobs:
       # DOCKER IMAGE SCAN
       # -------------------------
       - name: Build backend image
-        run: docker build -t backend:ci app/backend
+        run: docker build -t backend:ci -f app/backend/Dockerfile .
 
       - name: Trivy backend image scan
         uses: aquasecurity/trivy-action@0.20.0
