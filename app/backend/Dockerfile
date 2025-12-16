@@ -13,7 +13,7 @@ ENV RUNNING_IN_DOCKER=1
 
 WORKDIR /project
 
-RUN apt-get update
+RUN apt-get update && apt-get install -y libpq-dev build-essential
 
 COPY app/backend/pyproject.toml app/backend/uv.lock ./
 RUN uv sync --frozen --no-install-project --no-dev
@@ -28,4 +28,3 @@ EXPOSE 8000
 CMD uvicorn app.backend.main:app \
     --host 0.0.0.0 \
     --port 8000
-

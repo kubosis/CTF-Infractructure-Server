@@ -190,3 +190,5 @@ testuser.txt
 logs/
 
 .env.services
+
+values.yaml
