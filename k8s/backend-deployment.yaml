@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: ghcr.io/kubosis/pwndepot/backend:latest
+        image: ghcr.io/kubosis/pwndepot/backend:b616b34
         ports:
         - containerPort: 8000
 
