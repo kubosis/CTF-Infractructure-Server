@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - deployment
     paths:
       - 'app/**'        # Only run if app code changes
       - '.github/workflows/deploy.yml'
