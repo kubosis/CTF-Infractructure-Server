@@ -141,7 +141,7 @@ async def change_password(
     account_password: str = Body(...),
     current_user: CurrentUserDep = None,
     team_repo: TeamsRepositoryDep = None,
-    account_repo: UserRepositoryDep = None,  # <-- MUSI BYĆ!
+    account_repo: UserRepositoryDep = None,
 ):
     # verify account password
     if not account_repo.pwd_manager.verify_password(account_password, current_user.hashed_password):
@@ -213,8 +213,8 @@ async def join_team_invite(
         raise HTTPException(404, "Team not found")
 
     # enforce max 5 users
-    if len(team.user_associations) >= 5:
-        raise HTTPException(400, "Team is full (maximum 5 members).")
+    if len(team.user_associations) >= 6:
+        raise HTTPException(400, "Team is full (maximum 6 members).")
 
     # 3. Ensure user is not already in a team
     existing = await team_repo.get_team_for_user(current_user.id)
@@ -284,8 +284,6 @@ async def leave_current_team(current_user: CurrentUserDep, team_repo: TeamsRepos
 # -------------------------------------------------------
 # TRANSFER CAPTAIN ROLE
 # -------------------------------------------------------
-
-
 @router.post("/actions/{team_name}/transfer-captain", response_model=dict)
 async def transfer_captain(
     team_name: str,
