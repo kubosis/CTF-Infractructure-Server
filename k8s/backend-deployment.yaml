@@ -29,8 +29,10 @@ spec:
         # 2. Hardcoded / Non-Critical Configs
         env:
         # Dynamic Database URL construction
-        - name: DATABASE_URL
+        - name: SQLALCHEMY_POSTGRE_SYNC_URL
           value: "postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres:5432/$(POSTGRES_DB)"
+        - name: SQLALCHEMY_POSTGRE_ASYNC_URL
+          value: "postgresql+asyncpg://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres:5432/$(POSTGRES_DB)"
 
         # Server Config
         - name: UVICORN_SERVER_HOST
