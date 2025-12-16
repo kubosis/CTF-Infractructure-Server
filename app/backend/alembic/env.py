@@ -1,9 +1,14 @@
 import sys
-from logging.config import fileConfig
 from pathlib import Path
+
+sys.path.insert(0, Path(__file__).absolute().parent.parent.parent.parent.__str__())
+
+from logging.config import fileConfig
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
+
+from app.backend.config.settings import get_settings
 
 # import all database tables HERE ------------------------------
 from app.backend.db.base import Base
@@ -13,8 +18,8 @@ from app.backend.db.models import (  # noqa
 
 # --------------------------------------------------------------
 target_metadata = Base.metadata
+settings = get_settings()
 
-sys.path.insert(0, Path(__file__).absolute().parent.parent.parent.parent.__str__())
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -38,7 +43,7 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url")
+    url = settings.SQLALCHEMY_DATABASE_URL
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -58,7 +63,7 @@ def run_migrations_online() -> None:
 
     """
     connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
+        {"sqlalchemy.url": settings.SQLALCHEMY_DATABASE_SYNC_URL},
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
