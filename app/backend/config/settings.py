@@ -114,9 +114,8 @@ class BackendBaseSettings(BaseSettings):
     # -----------------------------
     # API ROUTING
     # -----------------------------
-    API_VERSION: str = "v1"
+    API_VERSION: str = decouple.config("API_VERSION", default="v1")
     API_PREFIX: str = f"api/{API_VERSION}"
-    API_V1_STR: str = API_PREFIX
 
     DOCS_URL: str | None = "/docs" if ENV == "dev" else None
     OPENAPI_URL: str | None = "/openapi.json" if ENV == "dev" else None
