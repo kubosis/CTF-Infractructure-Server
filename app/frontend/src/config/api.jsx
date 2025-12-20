@@ -28,6 +28,8 @@ const NO_REFRESH_ENDPOINTS = [
   "/users/resend-verification",
   "/users/auth/refresh",
   "/users/logout",
+  "/users/forgot-password",
+  "/users/reset-password",
   // ADMIN STEP-UP MFA 
   "/mfa/admin/verify",
   "/users/", // delete + status (important)

@@ -104,6 +104,8 @@ export default function Login({ setLoggedInUser }) {
 
       setLoginPhase("success");
       setSuccessMessage("Login successful");
+      const meRes = await api.get("/users/me");
+      setLoggedInUser(meRes.data);
       setLoading(false);
 
       // small delay to show success message
@@ -240,7 +242,7 @@ export default function Login({ setLoggedInUser }) {
         </p>
         <p className="mt-2 text-gray-400 text-sm">
           Forgot your password?{" "}
-          <Link to="/forgotpassword" className="text-blue-400 underline">
+          <Link to="/reset-password" className="text-blue-400 underline">
             Reset it
           </Link>
         </p>

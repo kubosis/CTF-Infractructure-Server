@@ -11,7 +11,7 @@ import TermsOfService from "./components/TermsOfService";
 import AcceptableUsePolicy from "./components/AcceptableUsePolicy";
 import PrivacyPolicy from "./components/PrivacyPolicy";
 import LegalNotice from "./components/LegalNotice";
-import ForgotPassword from "./components/forgotpassword";
+import ResetPassword from "./components/ResetPassword";
 import Profile from "./components/Profile";
 import JoinTeam from "./components/JoinTeam";
 import AdminPage from "./components/AdminPage";
@@ -225,7 +225,7 @@ function AppContent() {
               )
             }
           />
-          <Route path="/forgotpassword" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={< ResetPassword />} />
 
           {/* Protected routes */}
           <Route

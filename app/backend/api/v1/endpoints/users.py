@@ -35,10 +35,15 @@ from app.backend.db.session import get_async_session
 from app.backend.schema.admin import AdminDeleteConfirm
 from app.backend.schema.users import (
     ResendVerificationRequest,
+    ResetPasswordRequest,
     UserInCreate,
     UserInResponse,
     UserInUpdate,
     UserStatusUpdate,
+)
+from app.backend.security.exceptions import (
+    PasswordResetTokenExpired,
+    PasswordResetTokenInvalid,
 )
 from app.backend.security.refresh_tokens import generate_refresh_token
 from app.backend.security.tokens import (
@@ -46,7 +51,9 @@ from app.backend.security.tokens import (
     EmailVerificationTokenInvalid,
     create_email_verification_token,
     create_jwt_access_token,
+    create_password_reset_token,
     decode_email_verification_token,
+    decode_password_reset_token,
 )
 from app.backend.utils.admin_mfa import (
     clear_admin_mfa,
@@ -59,7 +66,7 @@ from app.backend.utils.email_validation import (
 )
 from app.backend.utils.exceptions import DBEntityDoesNotExist
 from app.backend.utils.limiter import limiter
-from app.backend.utils.mail import send_verification_email
+from app.backend.utils.mail import send_reset_password_email, send_verification_email
 
 router = fastapi.APIRouter(tags=["users"])
 settings = get_settings()
@@ -123,6 +130,92 @@ async def create_user(
     await asyncio.sleep(1)  # slight delay to avoid not sending email
     background_tasks.add_task(send_verification_email, email=email, token=verification_token)
     return _construct_user_in_response(db_user)
+
+
+# -----------------------------
+# FORGOT PASSWORD
+# -----------------------------
+@router.post("/forgot-password", status_code=200)
+@limiter.limit("2/minute")
+async def forgot_password(
+    request: Request,
+    payload: ResendVerificationRequest,  # use email
+    account_repo: UserRepositoryDep,
+    background_tasks: BackgroundTasks,
+):
+    email = payload.email.lower()
+    user = await account_repo.read_account_by_email(email)
+
+    # Always the same response (anti-enumeration)
+    if user:
+        token = create_password_reset_token(email)
+        background_tasks.add_task(send_reset_password_email, email, token)
+
+    return {"message": "If the account exists, a reset link was sent"}
+
+
+# -----------------------------
+# RESET PASSWORD
+# -----------------------------
+@router.post("/reset-password", status_code=200)
+@limiter.limit("2/minute")
+async def reset_password(
+    request: Request,
+    payload: ResetPasswordRequest,
+    account_repo: UserRepositoryDep,
+    async_session: AsyncSession = Depends(get_async_session),
+):
+    data = decode_password_reset_token(payload.token)
+    email = data["sub"]
+
+    user = await account_repo.read_account_by_email(email)
+    if not user:
+        raise HTTPException(404, "User not found")
+
+    # Check if new password is same as old password
+    if account_repo.pwd_manager.verify_password(
+        payload.password,
+        user.hashed_password,
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "code": "PASSWORD_REUSE",
+                "message": "New password must be different from the old password",
+            },
+        )
+
+    hashed = account_repo.pwd_manager.hash_password(payload.password)
+
+    await async_session.execute(update(UserTable).where(UserTable.id == user.id).values(hashed_password=hashed))
+
+    # revoke all refresh tokens
+    await async_session.execute(
+        update(RefreshTokenTable).where(RefreshTokenTable.user_id == user.id).values(revoked=True)
+    )
+
+    await async_session.commit()
+
+    return {"message": "Password reset successful"}
+
+
+# -----------------------------
+# VERIFY RESET PASSWORD
+# -----------------------------
+@router.get("/reset-password/verify", status_code=200)
+@limiter.limit("5/minute")
+async def verify_reset_password_token(
+    request: Request,
+    token: str,
+):
+    try:
+        decode_password_reset_token(token)
+    except PasswordResetTokenExpired:
+        raise HTTPException(status_code=410, detail="Reset token expired") from None
+    except PasswordResetTokenInvalid:
+        raise HTTPException(status_code=400, detail="Invalid reset token") from None
+
+    return {"valid": True}
 
 
 # -----------------------------

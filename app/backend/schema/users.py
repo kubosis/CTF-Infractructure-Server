@@ -43,6 +43,11 @@ class UserStatusUpdate(BaseModel):
     password: constr(min_length=1)
 
 
+class ResetPasswordRequest(BaseModel):
+    token: str
+    password: constr(min_length=12, max_length=128)
+
+
 # ------------------------------
 # UPDATE USER
 # ------------------------------

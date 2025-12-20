@@ -7,6 +7,8 @@ from app.backend.config.settings import get_settings
 from app.backend.security.exceptions import (
     EmailVerificationTokenExpired,
     EmailVerificationTokenInvalid,
+    PasswordResetTokenExpired,
+    PasswordResetTokenInvalid,
 )
 
 settings = get_settings()
@@ -86,5 +88,40 @@ def decode_email_verification_token(token: str) -> dict:
 
     if payload.get("type") != "email_verification":
         raise EmailVerificationTokenInvalid("Invalid token type")
+
+    return payload
+
+
+# RESET PASSWORD TOKEN
+def create_password_reset_token(email: str) -> str:
+    now = datetime.now(timezone.utc)
+
+    payload = {
+        "sub": email,
+        "type": "password_reset",
+        "iat": now,
+        "nbf": now,
+        "iss": "PwnDepot",
+        "exp": now + timedelta(hours=1),  # 1h
+    }
+
+    return jwt.encode(payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
+
+
+def decode_password_reset_token(token: str) -> dict:
+    try:
+        payload = jwt.decode(
+            token,
+            settings.JWT_SECRET_KEY,
+            algorithms=[settings.JWT_ALGORITHM],
+            issuer="PwnDepot",
+        )
+    except ExpiredSignatureError:
+        raise PasswordResetTokenExpired("Reset link has expired") from None
+    except PyJWTError:
+        raise PasswordResetTokenInvalid("Invalid reset token") from None
+
+    if payload.get("type") != "password_reset":
+        raise PasswordResetTokenInvalid("Invalid token type")
 
     return payload
