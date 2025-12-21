@@ -6,11 +6,9 @@ WORKDIR /project/app/frontend
 ENV VITE_API_URL=""
 ENV VITE_API_BASE_URL=""
 
-# only npm files
 COPY app/frontend/package.json app/frontend/package-lock.json* ./
 RUN npm ci
 
-# ONLY the content of frontend (not the catalogue)
 COPY app/frontend/. .
 
 RUN npm run build
