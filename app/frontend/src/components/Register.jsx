@@ -1,9 +1,9 @@
 // Register.jsx
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { evaluatePassword } from "../utils/passwordUtils";
 import { DEMO_MODE } from "../config/demo";
-import { api, FRONTEND_MODE } from "../config/api";
+import { api } from "../config/api";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -22,6 +22,9 @@ export default function Register() {
 
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+
+  const [loading, setLoading] = useState(false);
+  const isBusy = loading || !!successMessage;
 
   // ---------------------------
   // HANDLE FORM INPUT
@@ -53,22 +56,27 @@ export default function Register() {
 
     if (!isPasswordValid || !doPasswordsMatch) return;
 
+    setErrorMessage("");
+    setSuccessMessage("");
+    setLoading(true);
+
     // DEMO MODE (no backend)
     if (DEMO_MODE) {
       setSuccessMessage("Demo registration successful");
-      setTimeout(() => navigate("/login"), 1000);
+      setLoading(false);
+      setTimeout(() => navigate("/login"), 1200);
       return;
     }
 
     try {
-      const res = await api.post("/users/register", {
+      await api.post("/users/register", {
         username: formData.username,
         email: formData.email,
         password: formData.password,
       });
 
-      setSuccessMessage("Registration successful!");
-      setErrorMessage("");
+      setSuccessMessage("Registration successful! Verification Email Sent.");
+      setLoading(false);
 
       // PROD mode → COOKIE-based login → redirect normally
       // DEV mode → use token-based login → redirect normally
@@ -92,6 +100,7 @@ export default function Register() {
 
       setErrorMessage(msg);
       setSuccessMessage("");
+      setLoading(false);
     }
   };
 
@@ -121,6 +130,7 @@ export default function Register() {
             value={formData.username}
             onChange={handleChange}
             required
+            disabled={isBusy}
           />
 
           <input
@@ -130,6 +140,7 @@ export default function Register() {
             value={formData.email}
             onChange={handleChange}
             required
+            disabled={isBusy}
           />
 
           <input
@@ -139,6 +150,7 @@ export default function Register() {
             value={formData.password}
             onChange={handleChange}
             required
+            disabled={isBusy}
           />
 
           <input
@@ -148,16 +160,17 @@ export default function Register() {
             value={formData.confirmPassword}
             onChange={handleChange}
             required
+            disabled={isBusy}
           />
 
           <button
             type="submit"
-            disabled={!isFormValid}
+            disabled={!isFormValid || isBusy}
             className={`register-btn ${
               isFormValid ? "enabled-animation" : ""
             }`}
           >
-            Register
+            {isBusy ? "Registering ..." : "Register"}
           </button>
         </form>
 

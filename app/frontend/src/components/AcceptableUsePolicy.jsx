@@ -1,12 +1,11 @@
 // src/components/AcceptableUsePolicy.jsx
-import React from "react";
 import LegalPageTemplate from "./LegalPageTemplate";
 
 function AcceptableUsePolicy() {
   const aupContent = (
     <>
       <p>
-        By using ISEP CTF Platform, you agree to follow this Acceptable Use Policy (AUP):
+        By using PwnDepot, you agree to follow this Acceptable Use Policy (AUP):
       </p>
 
       <h2>Prohibited Actions</h2>

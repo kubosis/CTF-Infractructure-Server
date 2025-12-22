@@ -1,5 +1,5 @@
 // src/components/Teams.jsx
-import React, { useState } from "react";
+import { useState } from "react";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../config/api";
@@ -34,7 +34,7 @@ export default function Teams() {
   };
 
   checkTeam();
-}, []);
+}, [navigate]);
   if (checkingTeam) {
     return (
       <div className="register-container">

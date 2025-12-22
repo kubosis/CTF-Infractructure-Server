@@ -1,8 +1,16 @@
 // Profile.jsx
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer } from "recharts";
 import { api } from "../config/api";
+
+const PIE_COLORS = [
+    "#22c55e",
+    "#3b82f6",
+    "#eab308",
+    "#ef4444",
+    "#a855f7",
+  ];
 
 export default function Profile() {
   const { username } = useParams();
@@ -11,13 +19,6 @@ export default function Profile() {
   const [notFound, setNotFound] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
 
-  const PIE_COLORS = [
-    "#22c55e",
-    "#3b82f6",
-    "#eab308",
-    "#ef4444",
-    "#a855f7",
-  ];
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -30,7 +31,7 @@ export default function Profile() {
         try {
           const meRes = await api.get("/users/me");
           setCurrentUser(meRes.data);
-        } catch (err) {
+        } catch {
           // User might not be logged in, ignore
         }
 
@@ -46,7 +47,7 @@ export default function Profile() {
           }));
 
           setChallengeData(formattedData);
-        } catch (err) {
+        } catch {
           console.warn("Challenge stats not available yet.");
           setChallengeData([]);
         }

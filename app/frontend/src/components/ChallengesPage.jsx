@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { Link } from "react-router-dom";
 import { api } from "../config/api"; // Ensure this is configured for axios
 import { DEMO_MODE } from "../config/demo";
 
@@ -71,7 +70,7 @@ function ChallengeModal({ challenge, onClose, username }) {
     if (!challenge.is_download && !DEMO_MODE) {
       checkInstanceStatus();
     }
-  }, [challenge.id]);
+  }, [challenge.id, challenge.is_download, checkInstanceStatus]);
 
   // 2. Timer Countdown Logic
   useEffect(() => {
@@ -90,9 +89,9 @@ function ChallengeModal({ challenge, onClose, username }) {
       clearInterval(timerRef.current);
     }
     return () => clearInterval(timerRef.current);
-  }, [instance, timeLeft]);
+  }, [instance, timeLeft, checkInstanceStatus]);
 
-  const checkInstanceStatus = async () => {
+  const checkInstanceStatus = useCallback(async () => {
     try {
       const res = await api.get(`/challenges/${challenge.id}/instance`);
       if (res.data.is_running && res.data.connection) {
@@ -104,7 +103,7 @@ function ChallengeModal({ challenge, onClose, username }) {
     } catch (err) {
       console.error("Failed to check instance", err);
     }
-  };
+  }, [challenge.id]);
 
   const handleSpawn = async () => {
     setIsLoading(true);
@@ -144,7 +143,7 @@ function ChallengeModal({ challenge, onClose, username }) {
       // Using window.open triggers the download in a new tab (which immediately closes)
       const downloadUrl = `${api.defaults.baseURL || "/api/v1"}/challenges/${challenge.id}/download`;
       window.open(downloadUrl, "_blank");
-    } catch (err) {
+    } catch {
       setFeedback({ msg: "Download failed.", type: "error" });
     }
   };
@@ -271,9 +270,9 @@ export default function ChallengesPage() {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     if (DEMO_MODE) {
        // ... (Keep existing mock logic if needed)
        return;
@@ -304,7 +303,7 @@ export default function ChallengesPage() {
     } catch (err) {
         console.error("Failed to load challenges", err);
     }
-  };
+  }, []);
 
   return (
     <div className="challenges-page-container">
