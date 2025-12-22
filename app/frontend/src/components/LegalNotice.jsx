@@ -1,5 +1,4 @@
 // src/components/LegalNotice.jsx
-import React from "react";
 import LegalPageTemplate from "./LegalPageTemplate";
 
 function LegalNotice() {

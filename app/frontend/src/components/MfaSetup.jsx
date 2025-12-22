@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { QRCodeSVG } from "qrcode.react"; // Requires: npm install qrcode.react
 import { api } from "../config/api";
 import { useNavigate } from "react-router-dom";

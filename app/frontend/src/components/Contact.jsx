@@ -1,5 +1,5 @@
 // Contact.jsx
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export default function Contact() {
   // Form state
@@ -157,7 +157,7 @@ export default function Contact() {
         setFormData({ username: "", email: "", message: "" });
       }
 
-    } catch (_err) {
+    } catch {
       setFeedback({
         type: "error",
         text: "Something went wrong. Please try again later.",

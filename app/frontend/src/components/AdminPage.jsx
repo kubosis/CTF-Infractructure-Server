@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { DEMO_MODE } from "../config/demo";
 import { api } from "../config/api";
 import MFAInput from "../components/MFAInput";
 
+const INITIAL_TIME = 7 * 24 * 3600;
+
 export default function AdminPage({ loggedInUser, setLoggedInUser}) {
-  const INITIAL_TIME = 7 * 24 * 3600;
 
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [errorMessage, setErrorMessage] = useState("");
@@ -164,7 +165,7 @@ export default function AdminPage({ loggedInUser, setLoggedInUser}) {
       loadUsers();
       setMfaSuccess("");
 
-    } catch (_err) {
+    } catch {
       await minDelay(1200);
       setMfaRequired(false);
       setAdminMfaCode("");
@@ -452,7 +453,7 @@ export default function AdminPage({ loggedInUser, setLoggedInUser}) {
                       setAdminMfaStep(false);
                       setDeleteError("");
                       setMfaSuccess("");
-                    } catch (_err) {
+                    } catch (err) {
                       if (err.response?.data?.detail?.code === "MFA_REQUIRED") {
                         setAdminMfaStep(true);
                         setDeleteError("");
@@ -647,7 +648,7 @@ export default function AdminPage({ loggedInUser, setLoggedInUser}) {
                       setAdminMfaStep(false);
                       setStatusError("");
                       setMfaSuccess("");
-                    } catch (_err) {
+                    } catch (err) {
                       if (err.response?.data?.detail?.code === "MFA_REQUIRED") {
                         setAdminMfaStep(true);
                         setStatusError("");

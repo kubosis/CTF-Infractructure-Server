@@ -1,5 +1,4 @@
 // src/components/AcceptableUsePolicy.jsx
-import React from "react";
 import LegalPageTemplate from "./LegalPageTemplate";
 
 function AcceptableUsePolicy() {

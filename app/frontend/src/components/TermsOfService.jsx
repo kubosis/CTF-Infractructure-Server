@@ -1,5 +1,4 @@
 // src/components/TermsOfService.jsx
-import React from "react";
 import LegalPageTemplate from "./LegalPageTemplate";
 
 function TermsOfService() {

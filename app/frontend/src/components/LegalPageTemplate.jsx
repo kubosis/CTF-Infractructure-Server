@@ -1,5 +1,4 @@
 // src/components/LegalPageTemplate.jsx
-import React from "react";
 
 function LegalPageTemplate({ title, content }) {
   return (

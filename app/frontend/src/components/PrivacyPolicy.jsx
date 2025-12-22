@@ -1,5 +1,4 @@
 // src/components/PrivacyPolicy.jsx
-import React from "react";
 import LegalPageTemplate from "./LegalPageTemplate";
 
 function PrivacyPolicy() {

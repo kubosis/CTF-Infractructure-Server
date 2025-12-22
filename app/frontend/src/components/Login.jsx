@@ -1,5 +1,5 @@
 // src/components/Login.jsx
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { DEMO_MODE } from "../config/demo";
 import { api } from "../config/api";

@@ -1,5 +1,5 @@
 // JoinTeam.jsx
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { api } from "../config/api";
 

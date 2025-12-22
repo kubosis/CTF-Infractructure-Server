@@ -1,5 +1,5 @@
 // Profile.jsx
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer } from "recharts";
 import { api } from "../config/api";
@@ -31,7 +31,7 @@ export default function Profile() {
         try {
           const meRes = await api.get("/users/me");
           setCurrentUser(meRes.data);
-        } catch (_err) {
+        } catch {
           // User might not be logged in, ignore
         }
 
@@ -47,12 +47,12 @@ export default function Profile() {
           }));
 
           setChallengeData(formattedData);
-        } catch (_err) {
+        } catch {
           console.warn("Challenge stats not available yet.");
           setChallengeData([]);
         }
-      } catch (_err) {
-        console.error("Profile load error:", _err);
+      } catch (err) {
+        console.error("Profile load error:", err);
         setNotFound(true);
         setUser(null);
       }

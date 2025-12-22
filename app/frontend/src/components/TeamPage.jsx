@@ -1,5 +1,5 @@
 // TeamPage.jsx 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { api } from "../config/api";
 import {
@@ -11,6 +11,8 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import "../index.css";
+
+const COLORS = ["#22c55e", "#facc15", "#ef4444", "#3b82f6", "#a855f7"];
 
 export default function TeamPage() {
   const { teamName } = useParams();
@@ -27,13 +29,11 @@ export default function TeamPage() {
   const [modalError, setModalError] = useState(false);
   const [selectedNewCaptain, setSelectedNewCaptain] = useState(null);
 
-  const COLORS = ["#22c55e", "#facc15", "#ef4444", "#3b82f6", "#a855f7"];
-
   useEffect(() => {
     loadTeam();
-  }, [teamName]);
+  }, [loadTeam]);
 
-  const loadTeam = async () => {
+  const loadTeam = useCallback(async () => {
     try {
       const res = await api.get(`/teams/by-name/${teamName}`);
       const data = res.data;
@@ -64,7 +64,7 @@ export default function TeamPage() {
       console.error(err);
       setNotFound(true);
     }
-  };
+  }, [teamName]);
 
   if (notFound)
     return (

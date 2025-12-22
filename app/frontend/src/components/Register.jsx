@@ -1,9 +1,9 @@
 // Register.jsx
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { evaluatePassword } from "../utils/passwordUtils";
 import { DEMO_MODE } from "../config/demo";
-import { api, FRONTEND_MODE } from "../config/api";
+import { api } from "../config/api";
 
 export default function Register() {
   const navigate = useNavigate();

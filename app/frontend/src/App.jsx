@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
@@ -84,7 +84,9 @@ function AppContent() {
             setIsAdminLoggedIn(true);
           }
         }
-      } catch {_err}
+      } catch (err) {
+        console.error("Failed to parse loggedInUser:", err);
+      }
       setAuthLoading(false);
       return;
     }
@@ -265,10 +267,12 @@ function AppContent() {
           <Route
             path="/admin"
             element={
-            <AdminPage
-            loggedInUser={loggedInUser}
-            setLoggedInUser={setLoggedInUser}
-            />
+            <AdminRoute>
+              <AdminPage
+                loggedInUser={loggedInUser}
+                setLoggedInUser={setLoggedInUser}
+              />
+            </AdminRoute>
             }
           />
 
